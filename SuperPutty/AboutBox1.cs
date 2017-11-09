@@ -20,9 +20,10 @@
  */
 
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
-using System.Diagnostics;
 
 namespace SuperPutty
 {
@@ -31,22 +32,28 @@ namespace SuperPutty
         public AboutBox1()
         {
             InitializeComponent();
-            this.Text = String.Format("About {0}", AssemblyTitle);
-            this.labelProductName.Text = AssemblyProduct;
-            this.labelVersion.Text = String.Format("Version {0}", AssemblyVersion);
-            this.labelCopyright.Text = AssemblyCopyright;
-            this.linkLabelCompany.Text = AssemblyCompany;
-            this.linkLabelCompany2.Text = "https://github.com/jimradford/superputty";
+            Text = $@"About {AssemblyTitle}";
+            labelProductName.Text = AssemblyProduct;
+            labelVersion.Text = $@"Version {AssemblyVersion}";
+            labelCopyright.Text = AssemblyCopyright;
+            linkLabelCompany.Text = AssemblyCompany;
+            linkLabelCompany2.Text = @"https://github.com/celerbern/superputty";
             //this.textBoxDescription.Text = AssemblyDescription;
 
-            textBoxSupportText.AppendText("SuperPuTTY Version: " + SuperPuTTY.Version + System.Environment.NewLine);
+            textBoxSupportText.AppendText("SuperPuTTY Version: " + SuperPuTTY.Version + Environment.NewLine);
             Assembly[] asms = AppDomain.CurrentDomain.GetAssemblies();
             foreach(var a in asms)
             {                
-                textBoxSupportText.AppendText(a.FullName + System.Environment.NewLine);                
+                textBoxSupportText.AppendText(a.FullName + Environment.NewLine);                
             }
 
 
+        }
+
+        public sealed override string Text
+        {
+            get => base.Text;
+            set => base.Text = value;
         }
 
         #region Assembly Attribute Accessors
@@ -64,7 +71,7 @@ namespace SuperPutty
                         return titleAttribute.Title;
                     }
                 }
-                return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase);
+                return Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase);
             }
         }
 

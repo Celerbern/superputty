@@ -431,7 +431,7 @@ namespace SuperPutty
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SessionData session = (SessionData)treeView1.SelectedNode.Tag;
-            if (MessageBox.Show("Are you sure you want to delete " + session.SessionName + "?", "Delete Session?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("Are you sure you want to delete " + session.SessionName + "?", @"PuTTY Not Found", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 //session.RegistryRemove(session.SessionName);
                 treeView1.SelectedNode.Remove();
@@ -603,7 +603,7 @@ namespace SuperPutty
                 {
                     if (DialogResult.Cancel == MessageBox.Show(
                         "Open All " + sessions.Count + " sessions?", 
-                        "WARNING", 
+                        @"PuTTY Not Found", 
                         MessageBoxButtons.OKCancel, MessageBoxIcon.Warning))
                     {
                         // bug out...too many sessions to open

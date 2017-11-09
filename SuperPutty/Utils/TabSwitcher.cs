@@ -22,9 +22,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
-using WeifenLuo.WinFormsUI.Docking;
+using System.Windows.Forms;
 using log4net;
+using WeifenLuo.WinFormsUI.Docking;
 
 namespace SuperPutty.Utils
 {
@@ -33,37 +35,56 @@ namespace SuperPutty.Utils
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(TabSwitcher));
 
-        public static ITabSwitchStrategy[] Strategies;
+        private static ITabSwitchStrategy[] _strategies;
+
+        public static ITabSwitchStrategy[] Strategies
+        {
+            get
+            {
+                if (_strategies == null)
+                {
+                    List<ITabSwitchStrategy> strats = new List<ITabSwitchStrategy>
+                    {
+                        new VisualOrderTabSwitchStrategy(),
+                        new OpenOrderTabSwitchStrategy(),
+                        new MruTabSwitchStrategy()
+                    };
+                    _strategies = strats.ToArray();
+                }
+                return _strategies;
+            }
+        }
+
         public TabSwitcher()
         {
-            this.Documents = this.tabSwitchStrategy.GetDocuments();
-            this.ActiveDocument = (ToolWindow)this.DockPanel.ActiveDocument;
+            Documents = _tabSwitchStrategy.GetDocuments();
+            ActiveDocument = (ToolWindow)DockPanel.ActiveDocument;
 
-            if(Strategies == null)
+            if(_strategies == null)
             {
                 List<ITabSwitchStrategy> strats = new List<ITabSwitchStrategy>
                 {
                     new VisualOrderTabSwitchStrategy(),
                     new OpenOrderTabSwitchStrategy(),
-                    new MRUTabSwitchStrategy()
+                    new MruTabSwitchStrategy()
                 };
-                Strategies = strats.ToArray();
+                _strategies = strats.ToArray();
             }
         }
 
         public static ITabSwitchStrategy StrategyFromTypeName(String typeName)
         {
-            if(Strategies == null)
+            if(_strategies == null)
             {
                 List<ITabSwitchStrategy> strats = new List<ITabSwitchStrategy>
                 {
                     new VisualOrderTabSwitchStrategy(),
                     new OpenOrderTabSwitchStrategy(),
-                    new MRUTabSwitchStrategy()
+                    new MruTabSwitchStrategy()
                 };
-                Strategies = strats.ToArray();
+                _strategies = strats.ToArray();
             }
-            ITabSwitchStrategy strategy = Strategies[0];
+            ITabSwitchStrategy strategy = _strategies[0];
             try
             {
                 Type t = Type.GetType(typeName);
@@ -81,35 +102,35 @@ namespace SuperPutty.Utils
 
         public TabSwitcher(DockPanel dockPanel)
         {
-            this.DockPanel = dockPanel;
-            this.DockPanel.ContentAdded += DockPanel_ContentAdded;
+            DockPanel = dockPanel;
+            DockPanel.ContentAdded += DockPanel_ContentAdded;
         }
 
         public ITabSwitchStrategy TabSwitchStrategy
         {
-            get { return this.tabSwitchStrategy; }
+            get => _tabSwitchStrategy;
             set
             {
-                if (this.tabSwitchStrategy != value)
+                if (_tabSwitchStrategy != value)
                 {
                     // clean up
-                    if (this.tabSwitchStrategy != null)
+                    if (_tabSwitchStrategy != null)
                     {
-                        Log.InfoFormat("Cleaning up old strategy: {0}", this.tabSwitchStrategy.Description);
-                        this.tabSwitchStrategy.Dispose();
+                        Log.InfoFormat("Cleaning up old strategy: {0}", _tabSwitchStrategy.Description);
+                        _tabSwitchStrategy.Dispose();
                     }
 
                     // set and init new one
-                    this.tabSwitchStrategy = value;
+                    _tabSwitchStrategy = value;
                     if (value != null)
                     {
-                        Log.InfoFormat("Initialing new strategy: {0}", this.tabSwitchStrategy.Description);
-                        this.tabSwitchStrategy.Initialize(this.DockPanel);
-                        foreach (IDockContent doc in this.DockPanel.Documents)
+                        Log.InfoFormat("Initialing new strategy: {0}", _tabSwitchStrategy.Description);
+                        _tabSwitchStrategy.Initialize(DockPanel);
+                        foreach (IDockContent doc in DockPanel.Documents)
                         {
-                            this.AddDocument((ToolWindow)doc);
+                            AddDocument((ToolWindow)doc);
                         }
-                        this.CurrentDocument = this.CurrentDocument ?? this.ActiveDocument;
+                        CurrentDocument = CurrentDocument ?? ActiveDocument;
                     }
                 }
             }
@@ -117,77 +138,76 @@ namespace SuperPutty.Utils
 
         public ToolWindow CurrentDocument
         {
-            get { return this.currentDocument; }
+            get => currentDocument;
             set
             {
                 //Log.Info("Setting current doc: " + value);
-                this.currentDocument = value;
-                this.TabSwitchStrategy.SetCurrentTab(value);
-                this.IsSwitchingTabs = false;
+                currentDocument = value;
+                TabSwitchStrategy.SetCurrentTab(value);
+                IsSwitchingTabs = false;
             }
         }
 
         void DockPanel_ContentAdded(object sender, DockContentEventArgs e)
         {
-            this.DockPanel.BeginInvoke(new Action(
+            DockPanel.BeginInvoke(new Action(
                 delegate
                 {
                     if (e.Content.DockHandler.DockState == DockState.Document)
                     {
                         ToolWindow window = (ToolWindow)e.Content;
-                        this.AddDocument(window);
+                        AddDocument(window);
                     }
                 }));
         }
 
-        void window_FormClosed(object sender, System.Windows.Forms.FormClosedEventArgs e)
+        void window_FormClosed(object sender, FormClosedEventArgs e)
         {
             ToolWindow window = (ToolWindow)sender;
-            this.RemoveDocument((ToolWindow)sender);
+            RemoveDocument((ToolWindow)sender);
         }
 
         void AddDocument(ToolWindow tab)
         {
-            this.TabSwitchStrategy.AddTab(tab);
+            TabSwitchStrategy.AddTab(tab);
             tab.FormClosed += window_FormClosed;
         }
 
         void RemoveDocument(ToolWindow tab)
         {
-            this.TabSwitchStrategy.RemoveTab(tab);
+            TabSwitchStrategy.RemoveTab(tab);
         }
 
         public bool MoveToNextDocument()
         {
-            this.IsSwitchingTabs = true;
-            return this.TabSwitchStrategy.MoveToNextTab();
+            IsSwitchingTabs = true;
+            return TabSwitchStrategy.MoveToNextTab();
         }
 
         public bool MoveToPrevDocument()
         {
-            this.IsSwitchingTabs = true;
-            return this.TabSwitchStrategy.MoveToPrevTab();
+            IsSwitchingTabs = true;
+            return TabSwitchStrategy.MoveToPrevTab();
         }
 
         public void Dispose()
         {
-            this.DockPanel.ContentAdded -= DockPanel_ContentAdded;
-            foreach (IDockContent content in this.DockPanel.Documents)
+            DockPanel.ContentAdded -= DockPanel_ContentAdded;
+            foreach (IDockContent content in DockPanel.Documents)
             {
-                ToolWindow win = content as ToolWindow;
-                if (win != null)
+                if (content is ToolWindow win)
                 {
-                    win.FormClosed -= this.window_FormClosed;
+                    win.FormClosed -= window_FormClosed;
                 }
             }
         }
 
         public IList<IDockContent> Documents;
         public ToolWindow ActiveDocument;
-        public DockPanel DockPanel { get; private set; }
+        public DockPanel DockPanel { get; }
         public bool IsSwitchingTabs { get; set; }
 
-        ITabSwitchStrategy tabSwitchStrategy;
+        ITabSwitchStrategy _tabSwitchStrategy;
         ToolWindow currentDocument;
     }
     #endregion
@@ -213,12 +233,12 @@ namespace SuperPutty.Utils
 
         protected AbstractOrderedTabSwitchStrategy(string desc)
         {
-            this.Description = desc;
+            Description = desc;
         }
 
         public void Initialize(DockPanel panel)
         {
-            this.DockPanel = panel;
+            DockPanel = panel;
         }
 
         public void AddTab(ToolWindow tab) { }
@@ -228,7 +248,7 @@ namespace SuperPutty.Utils
         {
             bool res = false;
             IList<IDockContent> docs = GetDocuments();
-            int idx = docs.IndexOf(this.DockPanel.ActiveDocument);
+            int idx = docs.IndexOf(DockPanel.ActiveDocument);
             if (idx != -1)
             {
                 ToolWindow winNext = (ToolWindow)docs[idx == docs.Count - 1 ? 0 : idx + 1];
@@ -242,7 +262,7 @@ namespace SuperPutty.Utils
         {
             bool res = false;
             IList<IDockContent> docs = GetDocuments();
-            int idx = docs.IndexOf(this.DockPanel.ActiveDocument);
+            int idx = docs.IndexOf(DockPanel.ActiveDocument);
             if (idx != -1)
             {
                 ToolWindow winPrev = (ToolWindow)docs[idx == 0 ? docs.Count - 1 : idx - 1];
@@ -273,7 +293,7 @@ namespace SuperPutty.Utils
 
         public override IList<IDockContent> GetDocuments()
         {
-            return GetDocuments(this.DockPanel);
+            return GetDocuments(DockPanel);
         }
 
         /// <summary>Get a List containing session panels from a <seealso cref="DockPanel"/></summary>
@@ -292,7 +312,7 @@ namespace SuperPutty.Utils
                 });
                 foreach (DockPane pane in panes)
                 {
-                    docs.AddRange(pane.Contents.OfType<ctlPuttyPanel>().Cast<IDockContent>());
+                    docs.AddRange(pane.Contents.OfType<ctlPuttyPanel>());
                 }
             }
             return docs;
@@ -310,42 +330,42 @@ namespace SuperPutty.Utils
 
         public override IList<IDockContent> GetDocuments()
         {
-            return new List<IDockContent>(this.DockPanel.DocumentsToArray());
+            return new List<IDockContent>(DockPanel.DocumentsToArray());
         }
     }
 
     #endregion
 
     #region MRUTabSwitchStrategy
-    public class MRUTabSwitchStrategy : ITabSwitchStrategy
+    public class MruTabSwitchStrategy : ITabSwitchStrategy
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(MRUTabSwitchStrategy));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(MruTabSwitchStrategy));
         public string Description { get; protected set; }
 
         public void Initialize(DockPanel panel)
         {
-            this.DockPanel = panel;
+            DockPanel = panel;
 			Description = "MRU: Similar to Windows Alt-Tab";
         }
 
         public void AddTab(ToolWindow newTab)
         {
             Log.InfoFormat("AddTab: {0}", newTab.Text);
-            this.docs.Add(newTab);
+            _docs.Add(newTab);
         }
 
         public void RemoveTab(ToolWindow oldTab)
         {
-            this.docs.Remove(oldTab);
+            _docs.Remove(oldTab);
         }
 
         public bool MoveToNextTab()
         {
             bool res = false;
-            int idx = docs.IndexOf(this.DockPanel.ActiveDocument);
+            int idx = _docs.IndexOf(DockPanel.ActiveDocument);
             if (idx != -1)
             {
-                ToolWindow winNext = (ToolWindow)docs[idx == docs.Count - 1 ? 0 : idx + 1];
+                ToolWindow winNext = (ToolWindow)_docs[idx == _docs.Count - 1 ? 0 : idx + 1];
                 winNext.Activate();
                 res = true;
             }
@@ -355,10 +375,10 @@ namespace SuperPutty.Utils
         public bool MoveToPrevTab()
         {
             bool res = false;
-            int idx = docs.IndexOf(this.DockPanel.ActiveDocument);
+            int idx = _docs.IndexOf(DockPanel.ActiveDocument);
             if (idx != -1)
             {
-                ToolWindow winNext = (ToolWindow)docs[idx == docs.Count - 1 ? 0 : idx + 1];
+                ToolWindow winNext = (ToolWindow)_docs[idx == _docs.Count - 1 ? 0 : idx + 1];
                 winNext.Activate();
                 res = true;
             }
@@ -369,14 +389,14 @@ namespace SuperPutty.Utils
         {
             if (window != null)
             {
-                if (this.docs.Contains(window))
+                if (_docs.Contains(window))
                 {
-                    this.docs.Remove(window);
-                    this.docs.Insert(0, window);
+                    _docs.Remove(window);
+                    _docs.Insert(0, window);
                     if (Log.IsDebugEnabled)
                     {
                         StringBuilder sb = new StringBuilder();
-                        foreach (IDockContent doc in docs)
+                        foreach (IDockContent doc in _docs)
                         {
                             sb.Append(((ToolWindow)doc).Text).Append(", ");
                         }
@@ -388,14 +408,14 @@ namespace SuperPutty.Utils
 
         public IList<IDockContent> GetDocuments()
         {
-            return this.docs;
+            return _docs;
         }
 
         public void Dispose() { }
 
         DockPanel DockPanel { get; set; }
 
-        private IList<IDockContent> docs = new List<IDockContent>();
+        private readonly IList<IDockContent> _docs = new List<IDockContent>();
 
     }
     #endregion

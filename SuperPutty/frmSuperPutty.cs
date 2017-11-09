@@ -88,7 +88,7 @@ namespace SuperPutty
         public frmSuperPutty()
         {
             // Verify Putty is set; Prompt user if necessary; exit otherwise
-            dlgFindPutty.PuttyCheck();
+            DlgFindPutty.PuttyCheck();
 
             InitializeComponent();
 
@@ -905,7 +905,7 @@ namespace SuperPutty
         {
             SuperPuTTY.ReportStatus("Editing Options");
 
-            dlgFindPutty dialog = new dlgFindPutty();
+            DlgFindPutty dialog = new DlgFindPutty();
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
                 ApplySettings();

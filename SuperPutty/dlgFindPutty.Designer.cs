@@ -1,6 +1,6 @@
 ﻿namespace SuperPutty
 {
-    partial class dlgFindPutty
+    partial class DlgFindPutty
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(dlgFindPutty));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DlgFindPutty));
             this.buttonOk = new System.Windows.Forms.Button();
             this.buttonBrowsePutty = new System.Windows.Forms.Button();
             this.buttonBrowsePscp = new System.Windows.Forms.Button();
@@ -1179,7 +1179,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "dlgFindPutty";
+            this.Name = "DlgFindPutty";
             this.Padding = new System.Windows.Forms.Padding(5);
             this.ShowIcon = false;
             this.ShowInTaskbar = false;

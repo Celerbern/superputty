@@ -487,7 +487,7 @@ namespace SuperPutty
                     }
                 } catch (InvalidOperationException ex)
                 {
-                    MessageBox.Show("Error trying to create session " + ex.Message, "Failed to create session panel", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error trying to create session " + ex.Message, @"PuTTY Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             return panel;
