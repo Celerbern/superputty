@@ -5,3 +5,6 @@ SuperPuttySetup/Release/*
 SuperPuttyUnitTests/bin/*
 SuperPuttyUnitTests/obj/*
 SuperPutty.v12.suo
+/.vs
+/SuperPuttyInstaller/bin/Debug
+/SuperPuttyInstaller/obj/Debug

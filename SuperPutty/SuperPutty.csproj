@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SuperPutty</RootNamespace>
     <AssemblyName>SuperPutty</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -128,7 +128,6 @@
     </Compile>
     <Compile Include="Gui\QuickSelectorData.cs">
       <DependentUpon>QuickSelectorData.xsd</DependentUpon>
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Gui\QuickSelectorData.Designer.cs">
       <AutoGen>True</AutoGen>
